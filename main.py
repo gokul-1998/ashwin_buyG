@@ -1,40 +1,48 @@
+from datetime import datetime
 from flask import Flask,render_template,request,redirect,url_for
 from flask_sqlalchemy import SQLAlchemy
 
 
 
 app = Flask(__name__)
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
+db = SQLAlchemy(app)
+
 
 users = []
 
-class User:
-    def __init__(self,id, username, email, password,is_store_manager):
-        self.id = id
-        self.username = username
-        self.email = email
-        self.password = password
-        self.is_store_manager = is_store_manager
+# class Todo(db.Model):
+#     id = db.Column(db.Integer, primary_key = True)
+#     content = db.Column(db.String(200), nullable = False)
+#     completed = db.Column(db.Integer, default= 0)
+#     date_created = db.Column(db.DateTime , default = datetime.now())
+
+
+#     def __repr__(self):
+#         return '<Task %r>' % self.id
     
-    def __repr__(self):
-        return '<User %r>' % self.username
+class User(db.Model):
+        id = db.Column(db.Integer, primary_key = True, autoincrement=True)
+        username = db.Column(db.String(200), nullable = False)
+        email = db.Column(db.String(200), nullable = False)
+        password = db.Column(db.String(200), nullable = False)
+        is_store_manager = db.Column(db.Integer, default= 0)
+    
+        def __repr__(self):
+            return '<User %r>' % self.username
 
-admin = User(1,'admin','admin@admin','admin',1)
-users.append(admin)
+class Section(db.Model):
+        id = db.Column(db.Integer, primary_key = True)
+        name = db.Column(db.String(200), nullable = False)
 
-class Section:
-    def __init__(self,id, name):
-        self.id = id
-        self.name = name
-
-class Product:
-    def __init__(self,id, name, price,expiry_date, quantity_available, section_id, description):
-        self.id = id
-        self.name = name
-        self.price = price # rate per unit  (e.g. 1kg)
-        self.expiry_date = expiry_date
-        self.quantity_available = quantity_available
-        self.section_id = section_id
-        self.description = description
+class Product(db.Model):
+        id = db.Column(db.Integer, primary_key = True)
+        name = db.Column(db.String(200), nullable = False)
+        price = db.Column(db.Integer, nullable = False)
+        expiry_date = db.Column(db.DateTime , default = datetime.now())
+        quantity_available = db.Column(db.Integer, nullable = False)
+        section_id = db.Column(db.Integer, nullable = False)
+        description = db.Column(db.String(200), nullable = False)
 
 @app.route('/')
 def index():
@@ -46,11 +54,15 @@ def signup():
         username = request.form['name']
         email = request.form['email']
         password = request.form['password']
-        id= len(users)+1
-        user = User(id,username,email,password,0)
-        users.append(user)
-        print(users)
-        return redirect(url_for('login'))
+        user = User(username=username,email=email,password=password,is_store_manager=0)
+        try:
+            db.session.add(user)
+            db.session.commit()
+            return redirect('/')
+        except:
+            return 'There was an issue adding new user'
+
+        # return redirect(url_for('login'))
     
     return render_template('signup.html')
 
@@ -72,4 +84,6 @@ def user_dashboard(user_id):
     return render_template('user_dashboard.html',user_id=user_id)
 
 if __name__ == '__main__':
+    with app.app_context():
+        db.create_all()
     app.run(debug=True)
