@@ -36,7 +36,7 @@ class Section(db.Model):
         name = db.Column(db.String(200), nullable = False)
 
 class Product(db.Model):
-        id = db.Column(db.Integer, primary_key = True)
+        id = db.Column(db.Integer, primary_key = True, autoincrement=True)
         name = db.Column(db.String(200), nullable = False)
         price = db.Column(db.Integer, nullable = False)
         expiry_date = db.Column(db.DateTime , default = datetime.now())
@@ -147,6 +147,77 @@ def rename_category(id):
         return render_template('rename_category.html', section=section)
 
 
+@app.route('/add_product/<int:category_id>', methods=['GET', 'POST'])
+def add_product(category_id):
+    category= Section.query.get_or_404(category_id)
+    if request.method == 'POST':
+        name = request.form.get('product_name')
+        price = request.form.get('price')
+        expiry_date = request.form.get('expiry_date')
+        quantity_available = request.form.get('quantity_available')
+        description = request.form.get('description')
+
+        expiry_date = datetime.strptime(expiry_date, '%Y-%m-%d')
+
+        new_product = Product(
+            name=name,
+            price=price,
+            expiry_date=expiry_date,
+            quantity_available=quantity_available,
+            section_id=category.id,  # Set the section_id to the current category
+            description=description
+        )
+
+        # Add the new product to the database
+        db.session.add(new_product)
+        db.session.commit()
+        return redirect(f"/view_category/{category_id}")
+          
+    return render_template('add_product.html', category=category)
+
+@app.route('/view_category/<int:category_id>', methods=['GET', 'POST'])
+def view_category(category_id):
+     category= Section.query.get_or_404(category_id)
+     print(category.id,category.name)
+     products = Product.query.filter_by(section_id=category_id).all()
+
+
+     
+
+     return render_template('view_category.html',cat=category,products=products)
+@app.route('/delete_product/<int:id>')
+def delete_product(id):
+    product_to_delete = Product.query.get_or_404(id)
+    cat_id=product_to_delete.section_id
+    try:
+        db.session.delete(product_to_delete)
+        db.session.commit()
+        return redirect(f'/view_category/{cat_id}')
+    except:
+        return 'There was a problem deleting that product'
+   
+@app.route('/update_product/<int:id>', methods=['GET', 'POST'])
+def update_product(id):
+    product = Product.query.get_or_404(id)
+    expiry_date_str = product.expiry_date.strftime('%Y-%m-%d')
+
+    if request.method == 'POST':
+        product.name = request.form['product_name']
+        product.price = request.form['price']
+        expiry_date = request.form['expiry_date']
+        product.expiry_date = datetime.strptime(expiry_date, '%Y-%m-%d')
+        product.quantity_available = request.form['quantity_available']
+        product.description = request.form['description']
+
+        try:
+            db.session.commit()
+            return redirect(f'/view_category/{product.section_id}')
+        except:
+
+            return 'There was an issue updating your category'
+
+    else:
+        return render_template('update_product.html', product=product, date=expiry_date_str)
 
 if __name__ == '__main__':
     with app.app_context():

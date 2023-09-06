@@ -2,7 +2,6 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <style>
@@ -41,29 +40,34 @@
     </style>
 </head>
 <body>
-    <header>
-        <h1>Welcome, Dear Soumi Admin</h1>
-        <p>Good Morning</p>
-    </header>
     <div class="container">
-        <a href="/add_category">Add New Category</a>
+        <a href="/add_product/{{cat.id}}">Add New product</a>
         <table class="styled-table">
             <thead>
                 <tr>
-                    <th>Category Name</th>
-                    <th> View category</th>
-                    <th>Rename Category</th>
-                    <th>Delete Category</th>
+                    <th>Product Name</th>
+                    <th>Price</th>
+                    <th>expiry_date</th>
+                    <th>quantity_available</th>
+                    <th>description</th>
+                    <th>Update Product</th>
+                    <th>Delete Product</th>
+                
                 </tr>
             </thead>
             <tbody>
-                {% for blah in blahblah %}
+                {% for prod in products %}
                     <tr>
-                        <td>{{ blah.name }}</td>
-                        <td><a href="/view_category/{{ blah['id'] }}">View category</a></td>
-                        <td><a href="/rename_category/{{ blah['id'] }}">Rename Category</a></td>
-                        <td><a href="/delete_category/{{ blah['id'] }}">Delete Category</a></td>
+                        <td>{{ prod.name }}</td>
+                        <td>{{ prod.price }}</td>
+                        <td>{{ prod.expiry_date }}</td>
+                        <td>{{ prod.quantity_available }}</td>
+                        <td>{{ prod.description }}</td>
+                        <td><a href="/update_product/{{ prod['id'] }}">Update Product</a></td>
+                        <td><a href="/delete_product/{{ prod['id'] }}">Delete Product</a></td>
+                        
                     </tr>
+                
                 {% endfor %}
             </tbody>
         </table>
@@ -89,8 +93,5 @@
             background-color: #f2f2f2;
         }
     </style>
-    
-    
-    
 </body>
 </html>
