@@ -9,7 +9,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
 
 
-users = []
+
 
 # class Todo(db.Model):
 #     id = db.Column(db.Integer, primary_key = True)
@@ -44,6 +44,11 @@ class Product(db.Model):
         section_id = db.Column(db.Integer, nullable = False)
         description = db.Column(db.String(200), nullable = False)
 
+
+    
+
+
+
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -61,9 +66,7 @@ def signup():
             return redirect('/')
         except:
             return 'There was an issue adding new user'
-
-        # return redirect(url_for('login'))
-    
+            
     return render_template('signup.html')
 
 @app.route('/login',methods =['GET', 'POST'])
@@ -72,12 +75,32 @@ def login():
         email = request.form['email']
         password = request.form['password']
         print(email,password)
+        users=User.query.all()
         for user in users:
             if user.email == email and user.password == password:
                 print("inside if condition")
-                return redirect(url_for('user_dashboard',user=user))
+                return redirect(url_for('user_dashboard'))
         return redirect(url_for('login'))
     return render_template('login.html')
+
+
+@app.route('/admin_dashboard')
+def admin_dashboard():
+    return render_template('admin_dashboard.html')
+
+@app.route('/admin_login',methods =['GET', 'POST'])
+def admin_login():
+    if request.method == 'POST':
+        email = request.form['email']
+        password = request.form['password']
+        print(email,password)
+        users=User.query.all()
+        for user in users:
+            
+            if user.email == email and user.password == password:
+                return redirect(url_for('admin_dashboard'))
+        return redirect(url_for('admin_login'))
+    return render_template('admin_login.html')
 
 @app.route('/user_dashboard/<int:user_id>')
 def user_dashboard(user_id):
@@ -86,4 +109,10 @@ def user_dashboard(user_id):
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
+        admin = User.query.filter_by(username='admin').first()
+        if admin is None:
+            admin = User(username='admin',email='admin@admin.com',password='admin',is_store_manager=1)
+            db.session.add(admin)
+            db.session.commit()
+
     app.run(debug=True)
