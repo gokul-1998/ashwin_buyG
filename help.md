@@ -1,7 +1,11 @@
 - create a virtual environment
    - `python3 -m venv venv`
+   - if its windows type
+        - `py -m venv env`
 - activate the virtual environment
     - `source venv/bin/activate`
+    - For windows 
+        - `.\env\Scripts\activate` (use tabs autofill)
 
 - install flask
     - `pip install flask`

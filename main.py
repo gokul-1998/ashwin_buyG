@@ -32,7 +32,7 @@ class User(db.Model):
             return '<User %r>' % self.username
 
 class Section(db.Model):
-        id = db.Column(db.Integer, primary_key = True)
+        id = db.Column(db.Integer, primary_key = True, autoincrement=True)
         name = db.Column(db.String(200), nullable = False)
 
 class Product(db.Model):
@@ -86,7 +86,8 @@ def login():
 
 @app.route('/admin_dashboard')
 def admin_dashboard():
-    return render_template('admin_dashboard.html')
+    section=Section.query.all()
+    return render_template('admin_dashboard.html',blahblah=section)
 
 @app.route('/admin_login',methods =['GET', 'POST'])
 def admin_login():
@@ -105,6 +106,47 @@ def admin_login():
 @app.route('/user_dashboard/<int:user_id>')
 def user_dashboard(user_id):
     return render_template('user_dashboard.html',user_id=user_id)
+
+@app.route('/add_category',methods =['GET', 'POST'])
+def add_category():
+    if request.method == 'POST':
+        name = request.form['name']
+        user = Section(name=name)
+        try:
+                db.session.add(user)
+                db.session.commit()
+                return redirect('/admin_dashboard')
+        except:
+                return 'There was an issue adding new user'
+    return render_template('add_category.html')
+
+@app.route('/delete_category/<int:id>')
+def delete_category(id):
+    category_to_delete = Section.query.get_or_404(id)
+
+    try:
+        db.session.delete(category_to_delete)
+        db.session.commit()
+        return redirect('/admin_dashboard')
+    except:
+        return 'There was a problem deleting that task'
+@app.route('/rename_category/<int:id>', methods=['GET', 'POST'])
+def rename_category(id):
+    section = Section.query.get_or_404(id)
+
+    if request.method == 'POST':
+        section.name = request.form['name']
+
+        try:
+            db.session.commit()
+            return redirect('/admin_dashboard')
+        except:
+            return 'There was an issue renaming your category'
+
+    else:
+        return render_template('rename_category.html', section=section)
+
+
 
 if __name__ == '__main__':
     with app.app_context():
