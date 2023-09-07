@@ -1,14 +1,12 @@
 from datetime import datetime
 from flask import Flask,render_template,request,redirect,url_for
 from flask_sqlalchemy import SQLAlchemy
-
+from sqlalchemy.orm import relationship
 
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db = SQLAlchemy(app)
-
-
 
 
 # class Todo(db.Model):
@@ -34,6 +32,7 @@ class User(db.Model):
 class Section(db.Model):
         id = db.Column(db.Integer, primary_key = True, autoincrement=True)
         name = db.Column(db.String(200), nullable = False)
+        products = relationship('Product', backref='section', lazy=True)
 
 class Product(db.Model):
         id = db.Column(db.Integer, primary_key = True, autoincrement=True)
@@ -41,13 +40,8 @@ class Product(db.Model):
         price = db.Column(db.Integer, nullable = False)
         expiry_date = db.Column(db.DateTime , default = datetime.now())
         quantity_available = db.Column(db.Integer, nullable = False)
-        section_id = db.Column(db.Integer, nullable = False)
+        section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)  # Define a foreign key to establish the relationship
         description = db.Column(db.String(200), nullable = False)
-
-
-    
-
-
 
 @app.route('/')
 def index():
@@ -77,11 +71,20 @@ def login():
         print(email,password)
         users=User.query.all()
         for user in users:
-            if user.email == email and user.password == password:
+            if user.email == email and user.password == password and user.email!="admin@admin.com":
                 print("inside if condition")
-                return redirect(url_for('user_dashboard'))
+                return redirect(f'/user_dashboard/{user.id}')
         return redirect(url_for('login'))
     return render_template('login.html')
+
+@app.route('/user_dashboard/<int:user_id>',methods =['GET'])
+def user_dashboard(user_id):
+    cats = Section.query.all()
+    for i in cats:
+        print(i.name)
+        print(i.products)
+    user = User.query.get_or_404(user_id)
+    return render_template('user_dashboard.html',cats = cats, user=user)
 
 
 @app.route('/admin_dashboard')
@@ -102,10 +105,6 @@ def admin_login():
                 return redirect(url_for('admin_dashboard'))
         return redirect(url_for('admin_login'))
     return render_template('admin_login.html')
-
-@app.route('/user_dashboard/<int:user_id>')
-def user_dashboard(user_id):
-    return render_template('user_dashboard.html',user_id=user_id)
 
 @app.route('/add_category',methods =['GET', 'POST'])
 def add_category():
