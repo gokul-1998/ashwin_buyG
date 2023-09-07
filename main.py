@@ -25,6 +25,8 @@ class User(db.Model):
         email = db.Column(db.String(200), nullable = False)
         password = db.Column(db.String(200), nullable = False)
         is_store_manager = db.Column(db.Integer, default= 0)
+        user_cart = relationship('Cart', backref='user', lazy=True)
+
     
         def __repr__(self):
             return '<User %r>' % self.username
@@ -42,6 +44,52 @@ class Product(db.Model):
         quantity_available = db.Column(db.Integer, nullable = False)
         section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)  # Define a foreign key to establish the relationship
         description = db.Column(db.String(200), nullable = False)
+
+class Cart(db.Model):
+    id= db.Column(db.Integer, primary_key = True, autoincrement=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Define a foreign key to establish the relationship
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)  # Define a foreign key to establish the relationship
+    quantity = db.Column(db.Integer, nullable = False)
+    date_created = db.Column(db.DateTime , default = datetime.now())
+    is_purchased = db.Column(db.Integer, default= 0)
+    car_product = relationship('Product', backref='cart', lazy=True)
+import os
+if os.path.exists("./instance/test.db"):
+    os.remove("./instance/test.db")
+
+with app.app_context():
+        db.create_all()
+        admin = User.query.filter_by(username='admin').first()
+        if admin is None:
+            admin = User(username='admin',email='admin@admin.com',password='admin',is_store_manager=1)
+            db.session.add(admin)
+            db.session.commit()
+
+with app.app_context():
+    c1=Section(name="Fruits")
+    c2=Section(name="Vegetables")
+    c3=Section(name="Dairy")
+    db.session.add(c1)
+    db.session.add(c2)
+    db.session.add(c3)
+    db.session.commit()
+    p1=Product(name="Apple",price=50,expiry_date=datetime(2022,1,1),quantity_available=10,section_id=1,description="Good for health")
+    p2=Product(name="Banana",price=60,expiry_date=datetime(2022,1,1),quantity_available=10,section_id=1,description="Good for health")
+    p3=Product(name="Tomato",price=70,expiry_date=datetime(2022,1,1),quantity_available=10,section_id=2,description="Good for health")
+    p4=Product(name="Potato",price=80,expiry_date=datetime(2022,1,1),quantity_available=10,section_id=2,description="Good for health")
+    db.session.add(p1)
+    db.session.add(p2)
+    db.session.add(p3)
+    db.session.add(p4)
+    db.session.commit()
+    u1=User(username="gok",email="gok@gm.com",password="admin",is_store_manager=0)
+    db.session.add(u1)
+    db.session.commit()
+    c1=Cart(user_id=1,product_id=1,quantity=1)
+    c2=Cart(user_id=1,product_id=2,quantity=1)
+    user=User.query.all()
+    print(user[0].user_cart)
+
 
 @app.route('/')
 def index():
@@ -219,12 +267,5 @@ def update_product(id):
         return render_template('update_product.html', product=product, date=expiry_date_str)
 
 if __name__ == '__main__':
-    with app.app_context():
-        db.create_all()
-        admin = User.query.filter_by(username='admin').first()
-        if admin is None:
-            admin = User(username='admin',email='admin@admin.com',password='admin',is_store_manager=1)
-            db.session.add(admin)
-            db.session.commit()
-
+    
     app.run(debug=True)
