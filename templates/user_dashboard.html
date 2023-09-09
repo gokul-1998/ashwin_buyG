@@ -68,38 +68,49 @@
         <a href="#settings">Settings</a>
         <a href="logout.html">Logout</a>
         <a href="/showcart/{{user.id}}">showcart [ {{user.user_cart|length}} ] </a>
-        <form action="/user_dashboard/{{user.id}}" method="GET">
-            <input type="text" name="query" placeholder="Search..." value ={{query}}>
+        <br>
+        <br>
+        <form action="/user_dashboard/{{user.id}}" method="get">
+            {% with selected_categories=request.args.getlist('category') %}
+            <input type="checkbox" id="show-all" name="category" value="show-all" {% if 'show-all' in selected_categories %}checked{% endif %}>
+            <label for="show-all" class="category-label">Show All</label>
+            
+            {% for cat in cats %}
+                <input type="checkbox" id="{{cat.name}}" name="category" value="{{cat.name}}" {% if cat.name in selected_categories %}checked{% endif %}>
+                <label for="{{cat.name}}" class="category-label">{{cat.name}}</label>
+            {% endfor %}
+            
+            <input type="text" name="query" placeholder="Search..." value="{{ request.args.get('query') }}">
             <button type="submit">Search</button>
+            {% endwith %}
         </form>
-
+        
     </nav>
 
     {% for cat in cats %}
-    {% if cat.products|length>0 %}
-    <section>
-        
-        <h2>{{ cat.name }}</h2>
-        {% endif %}
-        <ul>
-            {% for product in cat.products if product in products %}
-
-            <li>
-                <strong>Name:</strong> {{ product.name }} <a href="/add_to_cart/{{user.id}}/{{product.id}}">Add To Cart</a><br>
-                <strong>Price:</strong> {{ product.price }}<br>
-                <strong>Expiry Date:</strong> {{ product.expiry_date }}<br>
-                <strong>Quantity Available:</strong> {{ product.quantity_available }}<br>
-                <strong>Description:</strong> {{ product.description }}<br>
-                {% for item in user.user_cart %}
-                {% if item.product_id==product.id %}
-                <strong>Quantity in the cart:</strong> 
-                {{item.quantity}}
-                {% endif %}
+        {% if selected_categories|length == 0 or cat.name in selected_categories or 'show-all' in selected_categories %}
+        {% if cat.products|length > 0 %}
+        <section>
+            <h2>{{ cat.name }}</h2>
+            <ul>
+                {% for product in cat.products if product in products %}
+                <li>
+                    <strong>Name:</strong> {{ product.name }} <a href="/add_to_cart/{{user.id}}/{{product.id}}">Add To Cart</a><br>
+                    <strong>Price:</strong> {{ product.price }}<br>
+                    <strong>Expiry Date:</strong> {{ product.expiry_date }}<br>
+                    <strong>Quantity Available:</strong> {{ product.quantity_available }}<br>
+                    <strong>Description:</strong> {{ product.description }}<br>
+                    {% for item in user.user_cart %}
+                    {% if item.product_id == product.id %}
+                    <strong>Quantity in the cart:</strong> {{ item.quantity }}
+                    {% endif %}
+                    {% endfor %}
+                </li>
                 {% endfor %}
-            </li>
-            {% endfor %}
-        </ul>
-    </section>
+            </ul>
+        </section>
+        {% endif %}
+        {% endif %}
     {% endfor %}
     
     <footer>

@@ -132,7 +132,7 @@ def login():
         return redirect(url_for('login'))
     return render_template('login.html')
 
-@app.route('/user_dashboard/<int:user_id>',methods =['GET'])
+@app.route('/user_dashboard/<int:user_id>', methods=['GET'])
 def user_dashboard(user_id):
     cats = Section.query \
     .outerjoin(Section.products) \
@@ -142,14 +142,19 @@ def user_dashboard(user_id):
     user = User.query.get_or_404(user_id)
     products = Product.query.all()
     query = request.args.get('query', '').lower()
+    selected_categories = request.args.getlist('category')
+    # if selected_categories:
+    #     cats=[cat for cat in cats if str(cat.name) in selected_categories]
+    print("selected",selected_categories)
+    print("cats",cats)
     if query:
         products = Product.query.filter(Product.name.contains(query)).all()
-        return render_template('user_dashboard.html',cats = cats,user=user,products = products,query=query)
-    for i in cats:
-        print(i.name)
-        print(i.products)
+        return render_template('user_dashboard.html',cats = cats,user=user,products = products,query=query,selected_categories=selected_categories)
+    # for i in cats:
+    #     print(i.name)
+    #     print(i.products)
     
-    return render_template('user_dashboard.html',cats = cats, user=user,products = products)
+    return render_template('user_dashboard.html',cats = cats, user=user,products = products,selected_categories=selected_categories)
 
 
 
