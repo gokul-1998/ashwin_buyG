@@ -185,16 +185,24 @@ def add_category():
                 return 'There was an issue adding new user'
     return render_template('add_category.html')
 
-@app.route('/delete_category/<int:id>')
+
+@app.route('/delete_category/<int:id>', methods=['POST'])
 def delete_category(id):
     category_to_delete = Section.query.get_or_404(id)
-
+    
     try:
-        db.session.delete(category_to_delete)
-        db.session.commit()
-        return redirect('/admin_dashboard')
-    except:
-        return 'There was a problem deleting that task'
+        if request.method == 'POST':
+            db.session.delete(category_to_delete)
+            db.session.commit()
+            return redirect(f'/admin_dashboard')
+        else:
+            # Redirect to the confirmation page if not a POST request
+            return redirect(f'/confirm_delete_product/{id}')
+    except Exception as e:
+        print(e)
+        return 'There was a problem deleting that product'
+
+
 @app.route('/rename_category/<int:id>', methods=['GET', 'POST'])
 def rename_category(id):
     section = Section.query.get_or_404(id)
@@ -245,10 +253,6 @@ def view_category(category_id):
      category= Section.query.get_or_404(category_id)
      print(category.id,category.name)
      products = Product.query.filter_by(section_id=category_id).all()
-
-
-     
-
      return render_template('view_category.html',cat=category,products=products)
 from flask import request
 
@@ -275,6 +279,10 @@ def confirm_delete_product(id):
     product_to_delete = Product.query.get_or_404(id)
     return render_template('confirm_delete_product.html', product=product_to_delete)
 
+@app.route('/confirm_delete_category/<int:id>')
+def confirm_delete_section(id):
+    section_to_delete = Section.query.get_or_404(id)
+    return render_template('confirm_delete_section.html', category=section_to_delete)
 
 
 @app.route('/update_product/<int:id>', methods=['GET', 'POST'])
