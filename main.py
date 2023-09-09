@@ -1,6 +1,8 @@
 from datetime import datetime
 from flask import Flask,render_template,request,redirect,url_for
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.orm import relationship, backref
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy import desc
 
@@ -35,7 +37,8 @@ class User(db.Model):
 class Section(db.Model):
         id = db.Column(db.Integer, primary_key = True, autoincrement=True)
         name = db.Column(db.String(200), nullable = False)
-        products = relationship('Product', backref='section', lazy=True , order_by='desc(Product.id)')
+        products = relationship('Product', backref='section', lazy=True, order_by='desc(Product.id)', cascade="all, delete-orphan")
+
 
 class Product(db.Model):
         id = db.Column(db.Integer, primary_key = True, autoincrement=True)
@@ -53,7 +56,7 @@ class Cart(db.Model):
     quantity = db.Column(db.Integer, nullable = False)
     date_created = db.Column(db.DateTime , default = datetime.now())
     is_purchased = db.Column(db.Integer, default= 0)
-    car_product = relationship('Product', backref='cart', lazy=True)
+    product_id = db.Column(db.Integer, ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
 import os
 # if os.path.exists("./test.db"):
 #     os.remove("./test.db")
@@ -247,17 +250,33 @@ def view_category(category_id):
      
 
      return render_template('view_category.html',cat=category,products=products)
-@app.route('/delete_product/<int:id>')
+from flask import request
+
+@app.route('/delete_product/<int:id>', methods=['POST'])
 def delete_product(id):
     product_to_delete = Product.query.get_or_404(id)
-    cat_id=product_to_delete.section_id
+    cat_id = product_to_delete.section_id
     try:
-        db.session.delete(product_to_delete)
-        db.session.commit()
-        return redirect(f'/view_category/{cat_id}')
-    except:
+        if request.method == 'POST':
+            db.session.delete(product_to_delete)
+            db.session.commit()
+            return redirect(f'/view_category/{cat_id}')
+        else:
+            # Redirect to the confirmation page if not a POST request
+            return redirect(f'/confirm_delete_product/{id}')
+    except Exception as e:
+        print(e)
         return 'There was a problem deleting that product'
-   
+       
+from flask import render_template
+
+@app.route('/confirm_delete_product/<int:id>')
+def confirm_delete_product(id):
+    product_to_delete = Product.query.get_or_404(id)
+    return render_template('confirm_delete_product.html', product=product_to_delete)
+
+
+
 @app.route('/update_product/<int:id>', methods=['GET', 'POST'])
 def update_product(id):
     product = Product.query.get_or_404(id)

@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Confirm Delete Product</title>
+</head>
+<body>
+    <h1>Confirm Deletion</h1>
+    <p>Are you sure you want to delete this product: {{ product.name }}?</p>
+    
+    <form action="/delete_product/{{ product.id }}" method="POST">
+        <input type="submit" value="Confirm">
+        <a href="/view_category/{{ product.section_id }}">Cancel</a>
+    </form>
+</body>
+</html>
