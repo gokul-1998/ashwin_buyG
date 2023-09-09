@@ -143,19 +143,17 @@ def user_dashboard(user_id):
     products = Product.query.all()
     query = request.args.get('query', '').lower()
     selected_categories = request.args.getlist('category')
-    # if selected_categories:
-    #     cats=[cat for cat in cats if str(cat.name) in selected_categories]
-    print("selected",selected_categories)
-    print("cats",cats)
+    min_price = request.args.get('min_price')
+    max_price = request.args.get('max_price')
+
+    # Apply a filter for price range if both min_price and max_price are provided
+    if min_price and max_price:
+        products = Product.query.filter(Product.price >= float(min_price), Product.price <= float(max_price)).all()
+
     if query:
         products = Product.query.filter(Product.name.contains(query)).all()
-        return render_template('user_dashboard.html',cats = cats,user=user,products = products,query=query,selected_categories=selected_categories)
-    # for i in cats:
-    #     print(i.name)
-    #     print(i.products)
-    
-    return render_template('user_dashboard.html',cats = cats, user=user,products = products,selected_categories=selected_categories)
-
+        
+    return render_template('user_dashboard.html', cats=cats, user=user, products=products, query=query, selected_categories=selected_categories, min_price=min_price, max_price=max_price)
 
 
 @app.route('/admin_dashboard')
