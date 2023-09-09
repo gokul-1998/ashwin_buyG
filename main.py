@@ -131,11 +131,18 @@ def login():
 @app.route('/user_dashboard/<int:user_id>',methods =['GET'])
 def user_dashboard(user_id):
     cats = Section.query.all()
+    user = User.query.get_or_404(user_id)
+    products = Product.query.all()
+    query = request.args.get('query', '').lower()
+    if query:
+        filtered = Product.query.filter(Product.name.contains(query)).all()
+        return render_template('user_dashboard.html',cats = cats, filtered=filtered,user=user)
     for i in cats:
         print(i.name)
         print(i.products)
-    user = User.query.get_or_404(user_id)
+    
     return render_template('user_dashboard.html',cats = cats, user=user)
+
 
 
 @app.route('/admin_dashboard')
@@ -345,9 +352,31 @@ def buy(user_id):
     cart_items=Cart.query.filter_by(user_id=user_id).all()
     # To remove all the cart items from the cart table
     for item in cart_items:
+        item.car_product.quantity_available-=item.quantity
         db.session.delete(item)
     db.session.commit()    
     return redirect(f'/user_dashboard/{user_id}')
+
+@app.route('/search', methods=['GET'])
+def search():
+    query = request.args.get('query', '').lower()
+    filtered = Product.query.filter(Product.name.contains(query)).all()
+    print(filtered)
+
+    #return "hello world"
+    cats = Section.query.all()
+
+    # Filter products based on the search query
+    filtered_cats = []
+    for cat in cats:
+        cat.products = [product for product in cat.products if query in product.name.lower()]
+
+        # Add categories with matching products to the filtered_cats list
+        if cat.products:
+            filtered_cats.append(cat)
+
+    return render_template('user_dashboard.html', cats=filtered_cats, user=user, query=query)
+
 
 if __name__ == '__main__':
     

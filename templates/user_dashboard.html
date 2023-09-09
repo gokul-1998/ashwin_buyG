@@ -60,13 +60,19 @@
     <header>
         <h1>Welcome, {{ user.username }}</h1>
     </header>
-
+   
+    
     <nav>
         <a href="#profile">Profile</a>
         <a href="#orders">Orders</a>
         <a href="#settings">Settings</a>
         <a href="logout.html">Logout</a>
         <a href="/showcart/{{user.id}}">showcart [ {{user.user_cart|length}} ] </a>
+        <form action="/user_dashboard/{{user.id}}" method="GET">
+            <input type="text" name="query" placeholder="Search...">
+            <button type="submit">Search</button>
+        </form>
+
     </nav>
 
     {% for cat in cats %}
