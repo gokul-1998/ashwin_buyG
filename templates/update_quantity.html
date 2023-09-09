@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <h2>Update quantity</h2>
+    {{item_to_update}}
+    <h3>Product Name: {{ item_to_update.car_product.name }}</h3>
+    <h3>Product Price: ${{ item_to_update.car_product.price }}</h3>
+    <h3>Product Expiry Date: {{ item_to_update.car_product.expiry_date }}</h3>
+    <h3>Available Quantity: {{ item_to_update.car_product.quantity_available }}</h3>
+    <h3>Cost of Item: ${{ item_to_update.quantity * item_to_update.car_product.price }}</h3>
+    <form action="/update_quantity/{{item_to_update.user_id}}/{{item_to_update.car_product.id}}" method="post">
+        <div class="mb-3">
+            <label for="update_quantity" class="form-label">update quantity</label>
+            <input type="text" class="form-control" id="update_quantity" name="update_quantity" required value="{{item_to_update.quantity}}">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Update</button>
+    </form>
+
+</body>
+</html>

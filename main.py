@@ -299,7 +299,55 @@ def showcart(user_id):
         Total+=item.quantity*item.car_product.price
     return render_template('showcart.html',user=user,cart_items=cart_items,Total=Total)
 
+@app.route('/remove_item/<int:user_id>/<int:item_id>', methods=['GET', 'POST'])
 
+def remove_item(user_id,item_id):
+    
+    item_to_delete = Cart.query.get_or_404(item_id)
+    try:
+        db.session.delete(item_to_delete)
+        db.session.commit()
+        return redirect(f'/showcart/{user_id}')
+    except:
+        return 'There was a problem deleting that item'
+
+@app.route('/update_quantity/<int:user_id>/<int:item_id>', methods=['GET', 'POST'])
+
+def update_quantity(user_id,item_id):
+    
+    #item_to_update = Cart.query.get_or_404(user_id,item_id)
+    #above line is same as below line
+    item_to_update = Cart.query.filter_by(user_id=user_id,product_id=item_id).first()
+    print(item_to_update)
+    if request.method == 'POST':
+        Quantity = request.form['update_quantity']
+        item_to_update.quantity=Quantity
+        db.session.commit()
+        return redirect(f'/showcart/{user_id}')
+    else:
+        return render_template('update_quantity.html',item_to_update=item_to_update)
+    return render_template('update_quantity.html')
+
+@app.route('/checkout/<int:user_id>', methods=['GET', 'POST'])
+
+def checkout(user_id):
+    user=User.query.get_or_404(user_id)
+    cart_items=Cart.query.filter_by(user_id=user_id).all()
+    Total=0
+    for item in cart_items:
+        Total+=item.quantity*item.car_product.price
+    return render_template('checkout.html',user=user,cart_items=cart_items,Total=Total)
+
+@app.route('/buy/<int:user_id>', methods=['GET', 'POST'])
+
+def buy(user_id):
+    
+    cart_items=Cart.query.filter_by(user_id=user_id).all()
+    # To remove all the cart items from the cart table
+    for item in cart_items:
+        db.session.delete(item)
+    db.session.commit()    
+    return redirect(f'/user_dashboard/{user_id}')
 
 if __name__ == '__main__':
     

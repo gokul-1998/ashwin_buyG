@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    {{user}}
+    {{cart_items}}
+    {{Total}}
+    <h2>Do you want to checkout {{user.username}}</h2>
+    Total amount is: {{Total}}<br>
+    <h1><a href="/buy/{{user.id}}" >Pay {{Total}}</a><br></h1>
+    The items in your cart are as follows<br>
+    {% for item in cart_items %}
+    <div class="cart-item">
+        <h3>Quantity in Cart: {{ item.quantity }}</h3>
+        <h3>Product Name: {{ item.car_product.name }}</h3>
+        <h3>Product Price: ${{ item.car_product.price }}</h3>
+        <h3>Cost of Item: ${{ item.quantity * item.car_product.price }}</h3>
+       
+    </div>
+{% endfor %}
+
+
+</body>
+</html>

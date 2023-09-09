@@ -49,6 +49,7 @@
     <div class="total-price">
         <h2>Total Price: ${{ Total }}</h2>
     </div>
+    <h2><a href="/checkout/{{user.id}}">Checkout</a></h2>
     {% for item in cart_items %}
         <div class="cart-item">
             <h3>Quantity in Cart: {{ item.quantity }}</h3>
@@ -57,8 +58,12 @@
             <h3>Product Expiry Date: {{ item.car_product.expiry_date }}</h3>
             <h3>Available Quantity: {{ item.car_product.quantity_available }}</h3>
             <h3>Cost of Item: ${{ item.quantity * item.car_product.price }}</h3>
+            <a href="/remove_item/{{user.id}}/{{item.id}}">Remove item</a>
+            <a href="/update_quantity/{{user.id}}/{{item.car_product.id}}">Update Quantity</a>
+
         </div>
     {% endfor %}
+    
     
     
 </body>
