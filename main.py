@@ -2,6 +2,7 @@ from datetime import datetime
 from flask import Flask,render_template,request,redirect,url_for
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy.orm import relationship
+from sqlalchemy import desc
 
 
 app = Flask(__name__)
@@ -34,7 +35,7 @@ class User(db.Model):
 class Section(db.Model):
         id = db.Column(db.Integer, primary_key = True, autoincrement=True)
         name = db.Column(db.String(200), nullable = False)
-        products = relationship('Product', backref='section', lazy=True)
+        products = relationship('Product', backref='section', lazy=True , order_by='desc(Product.id)')
 
 class Product(db.Model):
         id = db.Column(db.Integer, primary_key = True, autoincrement=True)
@@ -130,7 +131,11 @@ def login():
 
 @app.route('/user_dashboard/<int:user_id>',methods =['GET'])
 def user_dashboard(user_id):
-    cats = Section.query.all()
+    cats = Section.query \
+    .outerjoin(Section.products) \
+    .group_by(Section.id) \
+    .order_by(desc(db.func.max(Product.id))) \
+    .all()
     user = User.query.get_or_404(user_id)
     products = Product.query.all()
     query = request.args.get('query', '').lower()
