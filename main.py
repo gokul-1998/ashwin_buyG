@@ -135,13 +135,13 @@ def user_dashboard(user_id):
     products = Product.query.all()
     query = request.args.get('query', '').lower()
     if query:
-        filtered = Product.query.filter(Product.name.contains(query)).all()
-        return render_template('user_dashboard.html',cats = cats, filtered=filtered,user=user)
+        products = Product.query.filter(Product.name.contains(query)).all()
+        return render_template('user_dashboard.html',cats = cats,user=user,products = products,query=query)
     for i in cats:
         print(i.name)
         print(i.products)
     
-    return render_template('user_dashboard.html',cats = cats, user=user)
+    return render_template('user_dashboard.html',cats = cats, user=user,products = products)
 
 
 
@@ -357,14 +357,6 @@ def buy(user_id):
     db.session.commit()    
     return redirect(f'/user_dashboard/{user_id}')
 
-@app.route('/search', methods=['GET'])
-def search():
-    query = request.args.get('query', '').lower()
-    filtered = Product.query.filter(Product.name.contains(query)).all()
-    print(filtered)
-
-    #return "hello world"
-    cats = Section.query.all()
 
     # Filter products based on the search query
     filtered_cats = []

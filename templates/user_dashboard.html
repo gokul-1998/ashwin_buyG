@@ -69,17 +69,21 @@
         <a href="logout.html">Logout</a>
         <a href="/showcart/{{user.id}}">showcart [ {{user.user_cart|length}} ] </a>
         <form action="/user_dashboard/{{user.id}}" method="GET">
-            <input type="text" name="query" placeholder="Search...">
+            <input type="text" name="query" placeholder="Search..." value ={{query}}>
             <button type="submit">Search</button>
         </form>
 
     </nav>
 
     {% for cat in cats %}
+    {% if cat.products|length>0 %}
     <section>
+        
         <h2>{{ cat.name }}</h2>
+        {% endif %}
         <ul>
-            {% for product in cat.products %}
+            {% for product in cat.products if product in products %}
+
             <li>
                 <strong>Name:</strong> {{ product.name }} <a href="/add_to_cart/{{user.id}}/{{product.id}}">Add To Cart</a><br>
                 <strong>Price:</strong> {{ product.price }}<br>
