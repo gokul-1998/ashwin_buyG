@@ -1,62 +1,23 @@
 from datetime import datetime
 from flask import Flask,render_template,request,redirect,url_for
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import relationship, backref
-from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 from sqlalchemy import desc
-
+from flask_restful import reqparse, abort, Api, Resource
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-db = SQLAlchemy(app)
 
 
-# class Todo(db.Model):
-#     id = db.Column(db.Integer, primary_key = True)
-#     content = db.Column(db.String(200), nullable = False)
-#     completed = db.Column(db.Integer, default= 0)
-#     date_created = db.Column(db.DateTime , default = datetime.now())
-
-
-#     def __repr__(self):
-#         return '<Task %r>' % self.id
-    
-class User(db.Model):
-        id = db.Column(db.Integer, primary_key = True, autoincrement=True)
-        username = db.Column(db.String(200), nullable = False)
-        email = db.Column(db.String(200), nullable = False)
-        password = db.Column(db.String(200), nullable = False)
-        is_store_manager = db.Column(db.Integer, default= 0)
-        user_cart = relationship('Cart', backref='user', lazy=True)
+api = Api(app)
 
     
-        def __repr__(self):
-            return '<User %r>' % self.username
+def main1():
+    from apis import category_api
+    from database import db
+    from database import User,Section,Product,Cart
 
-class Section(db.Model):
-        id = db.Column(db.Integer, primary_key = True, autoincrement=True)
-        name = db.Column(db.String(200), nullable = False)
-        products = relationship('Product', backref='section', lazy=True, order_by='desc(Product.id)', cascade="all, delete-orphan")
-
-
-class Product(db.Model):
-        id = db.Column(db.Integer, primary_key = True, autoincrement=True)
-        name = db.Column(db.String(200), nullable = False)
-        price = db.Column(db.Integer, nullable = False)
-        expiry_date = db.Column(db.DateTime , default = datetime.now())
-        quantity_available = db.Column(db.Integer, nullable = False)
-        section_id = db.Column(db.Integer, db.ForeignKey('section.id'), nullable=False)  # Define a foreign key to establish the relationship
-        description = db.Column(db.String(200), nullable = False)
-
-class Cart(db.Model):
-    id= db.Column(db.Integer, primary_key = True, autoincrement=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)  # Define a foreign key to establish the relationship
-    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)  # Define a foreign key to establish the relationship
-    quantity = db.Column(db.Integer, nullable = False)
-    date_created = db.Column(db.DateTime , default = datetime.now())
-    is_purchased = db.Column(db.Integer, default= 0)
-    product_id = db.Column(db.Integer, ForeignKey('product.id', ondelete='CASCADE'), nullable=False)
+    
 import os
 # if os.path.exists("./test.db"):
 #     os.remove("./test.db")
@@ -404,8 +365,10 @@ def buy(user_id):
 
     return render_template('user_dashboard.html', cats=filtered_cats, user=user, query=query)
 
+api.add_resource(category_api, '/api/category')
+
 
 if __name__ == '__main__':
-    
+    main1()
     app.run(debug=True)
 
