@@ -1,24 +1,21 @@
-from datetime import datetime
-from flask import Flask,render_template,request,redirect,url_for
 from flask_sqlalchemy import SQLAlchemy
-from sqlalchemy.orm import relationship
-from sqlalchemy import desc
+from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for
 from flask_restful import reqparse, abort, Api, Resource
-
+from models import db, User, Section, Product, Cart 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
-
+db.init_app(app)
 
 api = Api(app)
 
+from apis import category_api
+
     
-def main1():
-    from apis import category_api
-    from database import db
-    from database import User,Section,Product,Cart
 
     
 import os
+
 # if os.path.exists("./test.db"):
 #     os.remove("./test.db")
 if not os.path.exists("./test.db"):
@@ -369,6 +366,6 @@ api.add_resource(category_api, '/api/category')
 
 
 if __name__ == '__main__':
-    main1()
-    app.run(debug=True)
+
+    app.run(debug=True,port=5023)
 

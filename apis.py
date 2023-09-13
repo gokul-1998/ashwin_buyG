@@ -1,7 +1,7 @@
 from flask import Flask
 from flask_restful import reqparse, abort, Api, Resource
-from database import db,Section
-
+from database import db
+from models import User, Section, Product, Cart
 
 
 class category_api(Resource):
@@ -66,8 +66,4 @@ parser.add_argument('task')
 ##
 ## Actually setup the Api resource routing here
 ##
-
-api.add_resource(CategoryList, '/categories')
-api.add_resource(Category1, '/categories/<id>')
-
 
