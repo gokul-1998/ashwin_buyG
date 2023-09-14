@@ -8,9 +8,9 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db.init_app(app)
 
-api = Api(app)
 
-from apis import category_api
+
+
 
     
 
@@ -363,7 +363,7 @@ def buy(user_id):
 
     return render_template('user_dashboard.html', cats=filtered_cats, user=user, query=query)
 
-api.add_resource(category_api, '/api/category')
+
 
 
 if __name__ == '__main__':
