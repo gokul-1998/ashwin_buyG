@@ -1,22 +1,14 @@
 from flask_sqlalchemy import SQLAlchemy
 from datetime import datetime
-from flask import Flask, render_template, request, redirect, url_for
-from flask_restful import reqparse, abort, Api, Resource
+from flask import Flask, render_template, request, redirect, url_for,session
+from flask_restful import reqparse
 from models import db, User, Section, Product, Cart 
 from sqlalchemy import desc
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///test.db'
 db.init_app(app)
-
-
-
-
-
-    
-
     
 import os
-
 # if os.path.exists("./test.db"):
 #     os.remove("./test.db")
 if not os.path.exists("./test.db"):
@@ -352,21 +344,6 @@ def buy(user_id):
     return redirect(f'/user_dashboard/{user_id}')
 
 
-    # Filter products based on the search query
-    filtered_cats = []
-    for cat in cats:
-        cat.products = [product for product in cat.products if query in product.name.lower()]
-
-        # Add categories with matching products to the filtered_cats list
-        if cat.products:
-            filtered_cats.append(cat)
-
-    return render_template('user_dashboard.html', cats=filtered_cats, user=user, query=query)
-
-
-
-
 if __name__ == '__main__':
-
     app.run(debug=True,port=5023)
 
